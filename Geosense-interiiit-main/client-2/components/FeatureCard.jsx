@@ -135,6 +135,23 @@ const FeatureCard = ({ feature, setEditDetails, searchTerm, onSegmentationComple
                     </div>
                 </div>
 
+                {feature.properties?.estimated_value !== undefined && (
+                    <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-500/20 p-3 rounded-lg mt-2">
+                        <div className="flex justify-between items-center mb-1">
+                            <span className="text-xs text-blue-300 uppercase font-semibold">AI Appraisal</span>
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                                {feature.properties.quality || "Unknown"}
+                            </span>
+                        </div>
+                        <div className="flex justify-between items-end">
+                            <span className="text-[10px] text-slate-400">Estimated Value</span>
+                            <span className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
+                                {feature.properties.estimated_value.toLocaleString()} GEO
+                            </span>
+                        </div>
+                    </div>
+                )}
+
                 {!detecting ? (
                     <button 
                         onClick={() => sendMinMaxToServer(min, max)}

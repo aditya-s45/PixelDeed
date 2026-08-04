@@ -5,12 +5,12 @@ import { GEO_NFT_ADDRESS, GeoNFTABI, GEO_TOKEN_ADDRESS, GeoTokenABI } from '../c
 export function useTokenizeLand() {
   const { writeContract, isPending, isSuccess, error } = useWriteContract();
 
-  const tokenize = async (address, uri, coordinates, area) => {
+  const tokenize = async (address, uri, coordinates, area, estimatedValue) => {
     return writeContract({
       address: GEO_NFT_ADDRESS,
       abi: GeoNFTABI,
       functionName: 'tokenizeLand',
-      args: [address, uri, coordinates, area],
+      args: [address, uri, coordinates, area, estimatedValue],
     });
   };
 

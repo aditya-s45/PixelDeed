@@ -1,10 +1,38 @@
 import React, { useState } from 'react';
 import FeatureCard from './FeatureCard';
+import { useAccount } from 'wagmi';
+import { useTokenizeLand } from '../hooks/useContracts';
 
 const SideBar = ({ features, setEditDetails, onSegmentationComplete, selectionHandlers }) => {
   const [areas, setAreas] = useState({});
+  const [values, setValues] = useState({});
   const [calculating, setCalculating] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
+
+  const { address } = useAccount();
+  const { tokenize, isPending } = useTokenizeLand();
+
+  const handleMint = async () => {
+    if (!address) {
+        alert("Please connect your wallet first.");
+        return;
+    }
+    
+    const totalArea = Object.values(areas).reduce((sum, area) => sum + area, 0);
+    const totalValue = Object.values(values).reduce((sum, val) => sum + val, 0);
+    
+    // In a real app we'd upload metadata to IPFS here, but for now we'll just pass a mock URI
+    const uri = "ipfs://QmMockGeoNFTMetadataHash";
+    const coordinates = JSON.stringify(Object.keys(areas)); // Just a mock for demo
+    
+    try {
+        await tokenize(address, uri, coordinates, Math.round(totalArea), totalValue);
+        alert("Transaction submitted! Please confirm in your wallet.");
+    } catch (error) {
+        console.error("Minting failed", error);
+        alert("Minting failed. See console.");
+    }
+  };
 
   const calculateAreas = async () => {
     if (!selectionHandlers || !selectionHandlers.getSelectedPolygons) return;
@@ -15,14 +43,18 @@ const SideBar = ({ features, setEditDetails, onSegmentationComplete, selectionHa
         const selectedIds = Array.from(selectedPolygons);
         
         const calculatedAreas = {};
+        const calculatedValues = {};
+        
         selectedIds.forEach(id => {
             const feature = selectionHandlers.getFeatureById(id);
             if (feature && feature.properties.area_m2) {
                 calculatedAreas[id] = parseFloat(feature.properties.area_m2);
+                calculatedValues[id] = parseFloat(feature.properties.estimated_value || 0);
             }
         });
         
         setAreas(calculatedAreas);
+        setValues(calculatedValues);
     } catch (error) {
         console.error('Error calculating areas:', error);
     }
@@ -123,13 +155,27 @@ const SideBar = ({ features, setEditDetails, onSegmentationComplete, selectionHa
                 </div>
               </div>
             </div>
+
+            <div className="pt-3 mt-3 border-t border-blue-500/30 flex justify-between items-center">
+              <span className="font-medium text-white">Appraised Value:</span>
+              <div className="text-right">
+                <div className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400 font-mono">
+                  {Object.values(values).reduce((sum, val) => sum + val, 0).toLocaleString()} GEO
+                </div>
+              </div>
+            </div>
             
             <button 
-              className="w-full mt-5 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white py-2.5 px-4 rounded-lg text-sm font-bold shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all flex justify-center items-center gap-2 group"
-              onClick={() => alert("Connecting to Web3 wallet...")}
+              className="w-full mt-5 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white py-2.5 px-4 rounded-lg text-sm font-bold shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all flex justify-center items-center gap-2 group disabled:opacity-50"
+              onClick={handleMint}
+              disabled={isPending}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:rotate-12 transition-transform"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
-              Mint GeoNFT for these Parcels
+              {isPending ? (
+                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:rotate-12 transition-transform"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
+              )}
+              {isPending ? "Minting..." : "Mint GeoNFT for these Parcels"}
             </button>
           </div>
         )}
