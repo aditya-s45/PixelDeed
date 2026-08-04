@@ -1,0 +1,10 @@
+flask==3.0.0
+flask-cors==4.0.0
+geopandas==0.14.0
+pyproj==3.6.1
+rasterio==1.3.9
+shapely==2.0.2
+Pillow==10.1.0
+requests==2.31.0
+numpy==1.26.2
+samgeo==0.0.9
