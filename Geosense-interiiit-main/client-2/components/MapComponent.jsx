@@ -218,12 +218,11 @@ const MapComponent = ({ textMode, editDetails, features, setFeatures, setSelecti
                     return newSelected;
                 });
     
-                // Import L dynamically to avoid SSR issues
-                // if (typeof window !== 'undefined') {
-                    // import('leaflet').then((L) => {
+                if (typeof window !== 'undefined') {
+                    import('leaflet').then((L) => {
                         L.DomEvent.stopPropagation(e);
-                    // });
-                // }
+                    });
+                }
             },
             mouseover: (e) => {
                 const layer = e.target;
