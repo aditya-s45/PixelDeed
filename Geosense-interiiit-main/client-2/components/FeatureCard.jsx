@@ -3,9 +3,34 @@ import React, { useState, useEffect } from 'react';
 const FeatureCard = ({ feature, setEditDetails, searchTerm, onSegmentationComplete }) => {
     const [copied, setCopied] = useState(false);
     const [detecting, setDetecting] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const [statusMessage, setStatusMessage] = useState('Initializing AI pipeline...');
 
     let geojsonFeature = feature.toGeoJSON();
     let type = geojsonFeature.geometry.type;
+
+    // Polling effect when detecting
+    useEffect(() => {
+        let interval;
+        if (detecting) {
+            interval = setInterval(async () => {
+                try {
+                    const res = await fetch('http://127.0.0.1:5010/status');
+                    if (res.ok) {
+                        const data = await res.json();
+                        setProgress(data.progress || 0);
+                        setStatusMessage(data.message || 'Processing...');
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch status", err);
+                }
+            }, 1000);
+        } else {
+            setProgress(0);
+            setStatusMessage('Initializing AI pipeline...');
+        }
+        return () => clearInterval(interval);
+    }, [detecting]);
 
     useEffect(() => {
         if (copied) {
@@ -110,23 +135,31 @@ const FeatureCard = ({ feature, setEditDetails, searchTerm, onSegmentationComple
                     </div>
                 </div>
 
-                <button 
-                    onClick={() => sendMinMaxToServer(min, max)}
-                    disabled={detecting}
-                    className="w-full bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border border-blue-500/30 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 group-hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] disabled:opacity-50 disabled:cursor-wait"
-                >
-                    {detecting ? (
-                        <>
-                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                            Detecting Parcels...
-                        </>
-                    ) : (
-                        <>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                            Start AI Land Detection
-                        </>
-                    )}
-                </button>
+                {!detecting ? (
+                    <button 
+                        onClick={() => sendMinMaxToServer(min, max)}
+                        className="w-full bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border border-blue-500/30 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)]"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                        Start AI Land Detection
+                    </button>
+                ) : (
+                    <div className="w-full bg-black/40 border border-blue-500/30 p-3 rounded-lg">
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-xs font-medium text-blue-300 flex items-center gap-2">
+                                <svg className="animate-spin h-3 w-3 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                {statusMessage}
+                            </span>
+                            <span className="text-xs text-blue-400 font-mono">{progress}%</span>
+                        </div>
+                        <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                            <div 
+                                className="bg-gradient-to-r from-blue-500 to-cyan-400 h-1.5 rounded-full transition-all duration-300 ease-out" 
+                                style={{ width: `${progress}%` }}
+                            ></div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

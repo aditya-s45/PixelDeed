@@ -123,6 +123,14 @@ const SideBar = ({ features, setEditDetails, onSegmentationComplete, selectionHa
                 </div>
               </div>
             </div>
+            
+            <button 
+              className="w-full mt-5 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white py-2.5 px-4 rounded-lg text-sm font-bold shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all flex justify-center items-center gap-2 group"
+              onClick={() => alert("Connecting to Web3 wallet...")}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:rotate-12 transition-transform"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
+              Mint GeoNFT for these Parcels
+            </button>
           </div>
         )}
 
