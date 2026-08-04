@@ -108,8 +108,10 @@ def masks_to_shapefile(mask_path, output_shp_path, threshold_percentile=5):
     }, crs=crs)
     
     gdf = gdf.sort_values('segment_id', ascending=False)
-    gdf.to_file(output_shp_path)
-    print(f"Saved {len(gdf)} polygons to {output_shp_path}")
+    output_pkl_path = output_shp_path.replace('.shp', '.pkl')
+    import pandas as pd
+    pd.to_pickle(gdf, output_pkl_path)
+    print(f"Saved {len(gdf)} polygons to {output_pkl_path}")
 
 
 def segment_satellite_image():

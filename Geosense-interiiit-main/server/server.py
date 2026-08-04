@@ -97,16 +97,17 @@ def get_segments():
         import rasterio.mask
         import numpy as np
         
-        shapefile_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
-                                    'temp', 'segmentation', 'temp_polygons.shp')
+        pkl_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                    'temp', 'segmentation', 'temp_polygons.pkl')
         tif_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
                                     'temp', 'imagery', 'temp_satellite.tif')
         
-        if not os.path.exists(shapefile_path):
-            return jsonify({'status': 'error', 'message': 'Segmentation shapefile not found'}), 404
+        if not os.path.exists(pkl_path):
+            return jsonify({'status': 'error', 'message': 'Segmentation pickle not found'}), 404
             
-        # Read shapefile
-        gdf = gpd.read_file(shapefile_path)
+        # Read pickle
+        import pandas as pd
+        gdf = pd.read_pickle(pkl_path)
         
         # Convert to WGS84 if not already
         if gdf.crs is None or gdf.crs.to_string() != 'EPSG:4326':
@@ -193,13 +194,14 @@ def calculate_areas():
         data = request.get_json()
         selected_ids = data.get('selectedIds', [])
         
-        shapefile_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
-                                    'temp', 'segmentation', 'temp_polygons.shp')
+        pkl_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                    'temp', 'segmentation', 'temp_polygons.pkl')
         
-        if not os.path.exists(shapefile_path):
-            return jsonify({'status': 'error', 'message': 'Shapefile not found'}), 404
+        if not os.path.exists(pkl_path):
+            return jsonify({'status': 'error', 'message': 'Pickle not found'}), 404
             
-        gdf = gpd.read_file(shapefile_path)
+        import pandas as pd
+        gdf = pd.read_pickle(pkl_path)
         areas = {}
         for idx in selected_ids:
             try:
