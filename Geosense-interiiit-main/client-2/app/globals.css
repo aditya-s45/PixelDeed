@@ -1,56 +1,118 @@
-
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+@import "leaflet-draw/dist/leaflet.draw.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+@theme {
+  --color-brand-light: #60a5fa;
+  --color-brand-primary: #3b82f6;
+  --color-brand-dark: #1e3a8a;
+  --color-brand-neon: #22d3ee;
+  --color-brand-purple: #a855f7;
+  
+  --color-bg-space: #0a0a0f;
+  --color-bg-glass: rgba(15, 23, 42, 0.7);
+  --color-bg-glass-border: rgba(255, 255, 255, 0.1);
+  
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --background: #0a0a0f;
+  --foreground: #f8fafc;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
 }
 
-/* Map-specific overrides to ensure controls and UI text are visible
-   regardless of the page-level theme. This forces readable dark text
-   on map controls, popups and sidebar elements. */
-#map-container, #map-container * {
+/* Glassmorphism utility */
+.glass-panel {
+  background: var(--color-bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-bg-glass-border);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  border-radius: 16px;
+}
+
+.text-gradient {
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(90deg, #3b82f6, #22d3ee, #a855f7);
+}
+
+/* Animations */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+  50% { box-shadow: 0 0 25px rgba(34, 211, 238, 0.8); }
+}
+
+.animate-glow {
+  animation: pulse-glow 3s infinite ease-in-out;
+}
+
+/* Leaflet map overrides */
+.leaflet-container {
+  background: #0a0a0f !important;
+  font-family: var(--font-sans) !important;
+}
+
+.leaflet-control-container .leaflet-routing-container,
+.leaflet-control-geosearch form {
+  background: rgba(15, 23, 42, 0.8) !important;
+  backdrop-filter: blur(8px);
+  color: #f8fafc !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.leaflet-control-geosearch input {
   color: #111 !important;
 }
 
-/* Leaflet control styling: make buttons and links dark on a light
-   translucent background so they are readable on any basemap. */
-.leaflet-control, .leaflet-bar {
-  background: rgba(255,255,255,0.9) !important;
-  color: #111 !important;
-}
-.leaflet-control a, .leaflet-control button, .leaflet-bar a, .leaflet-bar button {
-  color: #111 !important;
+.leaflet-bar {
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
 }
 
-/* GeoSearch control specific tweaks */
-.leaflet-control .leaflet-control-geosearch { 
-  background: rgba(255,255,255,0.95) !important;
-  color: #111 !important;
+.leaflet-bar a {
+  background-color: rgba(15, 23, 42, 0.8) !important;
+  color: #f8fafc !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(8px);
 }
 
-/* Ensure popups and tooltips are readable */
-.leaflet-popup-content, .leaflet-tooltip {
-  color: #111 !important;
+.leaflet-bar a:hover {
+  background-color: rgba(59, 130, 246, 0.3) !important;
+  color: #22d3ee !important;
 }
 
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+  background: rgba(15, 23, 42, 0.9) !important;
+  color: #f8fafc !important;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Hide scrollbar for a cleaner look */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0f; 
+}
+::-webkit-scrollbar-thumb {
+  background: #334155; 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569; 
+}

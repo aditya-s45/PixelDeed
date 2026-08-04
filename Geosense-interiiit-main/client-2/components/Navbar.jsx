@@ -1,20 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 
-// You can replace these with your own SVG icons or an icon library
 const MenuIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="h-6 w-6"
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="3" y1="12" x2="21" y2="12"></line>
     <line x1="3" y1="6" x2="21" y2="6"></line>
     <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -22,110 +11,82 @@ const MenuIcon = () => (
 );
 
 const XIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="h-6 w-6"
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="18" y1="6" x2="6" y2="18"></line>
     <line x1="6" y1="6" x2="18" y2="18"></line>
   </svg>
 );
 
-/**
- * A responsive, dark-themed navbar component.
- * Assumes Tailwind CSS is set up in your project.
- */
-export default function App() {
+export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const navItems = [
-    { name: 'Home', href: '#' },
-    { name: 'About', href: '#' },
-    { name: 'Services', href: '#' },
-    { name: 'Profile', href: 'profile' },
+    { name: 'Map Interface', href: '/geosense' },
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Marketplace', href: '/marketplace' },
   ];
 
   return (
-    <nav className="bg-gray-900 text-gray-100 shadow-lg font-sans">
+    <nav className={`fixed w-full z-50 transition-all duration-300 font-sans ${scrolled ? 'bg-[#0a0a0f]/80 backdrop-blur-md border-b border-white/10 shadow-lg' : 'bg-transparent'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           
-          {/* Logo / Brand Name */}
           <div className="flex-shrink-0">
-            <a href="#" className="text-2xl font-bold text-white">
-              GeoSense
-            </a>
+            <Link href="/" className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+              Geo<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">Sense</span>
+            </Link>
           </div>
 
-          {/* Desktop Navigation Links */}
           <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-4">
+            <div className="ml-10 flex items-center space-x-8">
               {navItems.map((item) => (
-                <a
+                <Link
                   key={item.name}
                   href={item.href}
-                  className="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                  className="text-sm font-medium text-slate-300 hover:text-white transition-colors duration-200 hover:text-shadow-[0_0_10px_rgba(255,255,255,0.5)]"
                 >
                   {item.name}
-                </a>
+                </Link>
               ))}
-              <ConnectButton />
+              <div className="pl-4 border-l border-white/10">
+                <ConnectButton showBalance={false} />
+              </div>
             </div>
           </div>
 
-          {/* Mobile Menu Button */}
           <div className="-mr-2 flex md:hidden">
             <button
-              onClick={toggleMobileMenu}
-              type="button"
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
-              aria-controls="mobile-menu"
-              aria-expanded={isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="inline-flex items-center justify-center p-2 rounded-md text-slate-300 hover:text-white hover:bg-white/5 transition-colors"
             >
-              <span className="sr-only">Open main menu</span>
               {isMobileMenuOpen ? <XIcon /> : <MenuIcon />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu Dropdown */}
-      <div
-        className={`${
-          isMobileMenuOpen ? 'block' : 'hidden'
-        } md:hidden border-t border-gray-700`}
-        id="mobile-menu"
-      >
-        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+      <div className={`md:hidden absolute w-full transition-all duration-300 overflow-hidden glass-panel rounded-none border-x-0 border-t-0 ${isMobileMenuOpen ? 'max-h-96 border-b' : 'max-h-0 border-none'}`}>
+        <div className="px-4 pt-2 pb-6 space-y-2">
           {navItems.map((item) => (
-            <a
+            <Link
               key={item.name}
               href={item.href}
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+              className="block px-3 py-3 rounded-lg text-base font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-colors"
+              onClick={() => setIsMobileMenuOpen(false)}
             >
               {item.name}
-            </a>
+            </Link>
           ))}
-        </div>
-        <div className="pb-3 px-2">
-           <a
-            href="#"
-            className="block w-full px-3 py-2 rounded-md text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-200 text-center"
-          >
-            Sign Up
-          </a>
+          <div className="pt-4 mt-4 border-t border-white/10">
+             <ConnectButton showBalance={false} />
+          </div>
         </div>
       </div>
     </nav>
