@@ -9,7 +9,7 @@ import threading
 
 # Add parent directory to path to import local modules
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from server.download_tiles import download_satellite_imagery_direct
+from download_tiles import download_satellite_imagery_direct
 from segment_land_hqsam import segment_satellite_image
 
 app = Flask(__name__)
