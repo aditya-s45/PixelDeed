@@ -4,17 +4,17 @@ import Navbar from '../../components/Navbar';
 import { useAccount } from 'wagmi';
 import { GEO_NFT_ADDRESS, GeoNFTABI } from '../../config/contracts';
 import { parseAbiItem, createPublicClient, http } from 'viem';
-import { hardhat } from 'viem/chains';
+import { sepolia } from 'viem/chains';
 
 export default function Dashboard() {
   const { address, isConnected } = useAccount();
   const [stats, setStats] = useState({ count: 0, area: "0.00", value: 0 });
   const [loading, setLoading] = useState(true);
 
-  // Bulletproof direct connection to the local blockchain
+  // Direct connection to Sepolia testnet
   const publicClient = createPublicClient({
-    chain: hardhat,
-    transport: http('http://127.0.0.1:8545')
+    chain: sepolia,
+    transport: http('https://eth-sepolia.g.alchemy.com/v2/alch__8putgeH4_Fu71Y5iIeHc')
   });
 
   useEffect(() => {

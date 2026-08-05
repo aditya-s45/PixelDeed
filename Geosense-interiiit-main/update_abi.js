@@ -10,9 +10,9 @@ content = content.replace(/export const GeoTokenABI = \[\s*[\s\S]*?\s*\];/m, 'ex
 content = content.replace(/export const LandEscrowABI = \[\s*[\s\S]*?\s*\];/m, 'export const LandEscrowABI = ' + JSON.stringify(escrow.abi) + ';');
 
 // Replace Addresses
-content = content.replace(/export const GEO_NFT_ADDRESS = ".*";/, 'export const GEO_NFT_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";');
-content = content.replace(/export const GEO_TOKEN_ADDRESS = ".*";/, 'export const GEO_TOKEN_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";');
-content = content.replace(/export const LAND_ESCROW_ADDRESS = ".*";/, 'export const LAND_ESCROW_ADDRESS = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";');
+content = content.replace(/export const GEO_NFT_ADDRESS = ".*";/, 'export const GEO_NFT_ADDRESS = "0xa09541C11897A5229e8f2D85CD95c129199Ef688";');
+content = content.replace(/export const GEO_TOKEN_ADDRESS = ".*";/, 'export const GEO_TOKEN_ADDRESS = "0x10fFe5f723B0D9d8Bef3B833686630eA5B8ab5A5";');
+content = content.replace(/export const LAND_ESCROW_ADDRESS = ".*";/, 'export const LAND_ESCROW_ADDRESS = "0xaf683a58BbfAD52BeA58e12E6D60Ee5f7f225bB9";');
 
 fs.writeFileSync('client-2/config/contracts.js', content);
 console.log("Updated contracts.js");

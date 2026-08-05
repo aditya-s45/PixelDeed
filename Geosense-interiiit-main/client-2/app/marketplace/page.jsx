@@ -4,12 +4,12 @@ import Navbar from '../../components/Navbar';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { GEO_NFT_ADDRESS, GeoNFTABI, LAND_ESCROW_ADDRESS, LandEscrowABI, GEO_TOKEN_ADDRESS, GeoTokenABI } from '../../config/contracts';
 import { parseAbiItem, createPublicClient, http } from 'viem';
-import { hardhat } from 'viem/chains';
+import { sepolia } from 'viem/chains';
 
-// Direct client to ensure we hit the local chain
+// Direct connection to Sepolia testnet
 const publicClient = createPublicClient({
-  chain: hardhat,
-  transport: http('http://127.0.0.1:8545')
+  chain: sepolia,
+  transport: http('https://eth-sepolia.g.alchemy.com/v2/alch__8putgeH4_Fu71Y5iIeHc')
 });
 
 export default function Marketplace() {
