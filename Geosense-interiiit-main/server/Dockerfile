@@ -1,32 +1,38 @@
-FROM python:3.9-slim
+FROM python:3.10-slim
 
-# Install system dependencies required for GeoPandas and OpenCV
+# Install system dependencies for GDAL, OpenCV, and git
 RUN apt-get update && apt-get install -y \
+    gdal-bin \
     libgdal-dev \
     libgl1-mesa-glx \
     libglib2.0-0 \
     git \
     && rm -rf /var/lib/apt/lists/*
 
+# Set GDAL config
+ENV GDAL_CONFIG=/usr/bin/gdal-config
+
 WORKDIR /app
 
-# Install PyTorch CPU version to save space
-RUN pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+# Install PyTorch CPU-only (saves ~1.5GB vs full CUDA build)
+RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
 
-# Copy requirements and install
+# Copy and install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy all files
+# Pre-download the HQ-SAM model weights (~2.5GB) during build
+# so the container starts instantly at runtime
+RUN mkdir -p /root/.cache/torch/hub/checkpoints && \
+    python -c "import urllib.request; urllib.request.urlretrieve('https://huggingface.co/lkeab/hq-sam/resolve/main/sam_hq_vit_h.pth', '/root/.cache/torch/hub/checkpoints/sam_hq_vit_h.pth')"
+
+# Copy all server code
 COPY . .
 
-# Expose the port (Hugging Face routes port 7860 by default)
+# Create temp directories
+RUN mkdir -p /app/temp/imagery /app/temp/segmentation
+
+# Hugging Face Spaces requires port 7860
 EXPOSE 7860
 
-# We need to override the hardcoded 5010 port in server.py
-# by running it via Gunicorn or passing an env var. We will just use sed to change it.
-RUN sed -i 's/port = 5010/port = 7860/g' server.py
-RUN sed -i 's/host = '\''127.0.0.1'\''/host = '\''0.0.0.0'\''/g' server.py
-
-# Run the Flask app
 CMD ["python", "server.py"]

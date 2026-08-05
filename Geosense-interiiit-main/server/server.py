@@ -8,7 +8,7 @@ import pyproj
 import threading
 
 # Add parent directory to path to import local modules
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from download_tiles import download_satellite_imagery_direct
 from segment_land_hqsam import segment_satellite_image
 
@@ -47,7 +47,7 @@ def minmax():
         max_lat, max_lon = max_coords[0], max_coords[1]
         
         # Create output directory for imagery
-        output_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'temp', 'imagery')
+        output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'temp', 'imagery')
         os.makedirs(output_dir, exist_ok=True)
         
         # Download imagery using direct tile stitching
@@ -97,9 +97,9 @@ def get_segments():
         import rasterio.mask
         import numpy as np
         
-        pkl_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+        pkl_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                                     'temp', 'segmentation', 'temp_polygons.pkl')
-        tif_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+        tif_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                                     'temp', 'imagery', 'temp_satellite.tif')
         
         if not os.path.exists(pkl_path):
@@ -194,7 +194,7 @@ def calculate_areas():
         data = request.get_json()
         selected_ids = data.get('selectedIds', [])
         
-        pkl_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+        pkl_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                                     'temp', 'segmentation', 'temp_polygons.pkl')
         
         if not os.path.exists(pkl_path):
@@ -231,7 +231,7 @@ def after_request(response):
     return response
 
 if __name__ == '__main__':
-    host = '127.0.0.1'
-    port = 5010
+    host = os.environ.get('HOST', '0.0.0.0')
+    port = int(os.environ.get('PORT', 7860))
     print(f'Server running on http://{host}:{port}')
-    app.run(debug=True, host=host, port=port)
+    app.run(debug=False, host=host, port=port)

@@ -136,7 +136,7 @@ const MapComponent = ({ textMode, editDetails, features, setFeatures, setSelecti
     const fetchSegmentationData = async () => {
         try {
             console.log("Fetching segmentation data...");
-            const response = await fetch('http://127.0.0.1:5010/get-segments');
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:5010'}/get-segments`);
             if (response.ok) {
                 const data = await response.json();
                 if (data.status === 'success') {

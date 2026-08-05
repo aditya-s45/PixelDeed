@@ -8,4 +8,6 @@ Pillow==10.1.0
 requests==2.31.0
 numpy==1.26.2
 samgeo==0.0.9
-git+https://github.com/SysCV/sam-hq.git
+opencv-python-headless==4.8.1.78
+matplotlib==3.8.2
+pandas==2.1.3
