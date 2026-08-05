@@ -6,7 +6,6 @@ RUN apt-get update && apt-get install -y \
     libgdal-dev \
     libgl1-mesa-glx \
     libglib2.0-0 \
-    git \
     && rm -rf /var/lib/apt/lists/*
 
 # Set GDAL config
@@ -21,10 +20,9 @@ RUN pip install --no-cache-dir torch torchvision --index-url https://download.py
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Pre-download the HQ-SAM model weights (~2.5GB) during build
-# so the container starts instantly at runtime
+# Pre-download the lighter HQ-SAM ViT-B model (~375MB)
 RUN mkdir -p /root/.cache/torch/hub/checkpoints && \
-    python -c "import urllib.request; urllib.request.urlretrieve('https://huggingface.co/lkeab/hq-sam/resolve/main/sam_hq_vit_h.pth', '/root/.cache/torch/hub/checkpoints/sam_hq_vit_h.pth')"
+    python -c "import urllib.request; urllib.request.urlretrieve('https://huggingface.co/lkeab/hq-sam/resolve/main/sam_hq_vit_b.pth', '/root/.cache/torch/hub/checkpoints/sam_hq_vit_b.pth')"
 
 # Copy all server code
 COPY . .
@@ -32,7 +30,7 @@ COPY . .
 # Create temp directories
 RUN mkdir -p /app/temp/imagery /app/temp/segmentation
 
-# Hugging Face Spaces requires port 7860
+# Render uses PORT env variable
 EXPOSE 7860
 
 CMD ["python", "server.py"]

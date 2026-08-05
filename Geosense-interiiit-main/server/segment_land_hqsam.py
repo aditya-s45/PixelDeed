@@ -35,12 +35,13 @@ def setup_model():
     cache_dir = os.path.expanduser("~/.cache/torch/hub/checkpoints")
     os.makedirs(cache_dir, exist_ok=True)
     
-    pth_path = os.path.join(cache_dir, "sam_hq_vit_h.pth")
+    # Use vit_b (375MB) instead of vit_h (2.5GB) for cloud deployment
+    pth_path = os.path.join(cache_dir, "sam_hq_vit_b.pth")
 
     # Ensure model exists
     if not os.path.exists(pth_path):
-        print("Downloading HQ-SAM model file...")
-        url = "https://huggingface.co/lkeab/hq-sam/resolve/main/sam_hq_vit_h.pth"
+        print("Downloading HQ-SAM ViT-B model file (375MB)...")
+        url = "https://huggingface.co/lkeab/hq-sam/resolve/main/sam_hq_vit_b.pth"
         urllib.request.urlretrieve(url, pth_path)
         print("Download complete!")
 
@@ -161,7 +162,7 @@ def segment_satellite_image():
         
         # SamGeo will now call our hijacked torch.load function
         sam = SamGeo(
-            model_type="vit_h",
+            model_type="vit_b",
             checkpoint=pth_path,
             device=torch_device,
             sam_kwargs=sam_kwargs,
