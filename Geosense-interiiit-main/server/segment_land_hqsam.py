@@ -5,18 +5,7 @@
 #############################
 
 import os
-#import leafmap  # Re-enable if needed to patch torch before SamGeo imports
-from samgeo.hq_sam import SamGeo
-import matplotlib.pyplot as plt
-import rasterio
-import cv2
-import numpy as np
-import urllib.request  # Use urllib
-import geopandas as gpd
-from rasterio import features
-from shapely.geometry import shape, Polygon
 import torch
-
 
 # --- START OF MONKEY-PATCH ---
 # Force all model loading to CPU (important for systems without GPU)
@@ -28,6 +17,19 @@ def cpu_torch_load(path, map_location=None, **kwargs):
 
 torch.load = cpu_torch_load
 # --- END OF MONKEY-PATCH ---
+
+from samgeo.hq_sam import SamGeo
+import matplotlib.pyplot as plt
+import rasterio
+import cv2
+import numpy as np
+import urllib.request  # Use urllib
+import geopandas as gpd
+from rasterio import features
+from shapely.geometry import shape, Polygon
+
+
+
 
 
 def setup_model():
