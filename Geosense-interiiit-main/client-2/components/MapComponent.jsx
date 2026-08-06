@@ -136,7 +136,7 @@ const MapComponent = ({ textMode, editDetails, features, setFeatures, setSelecti
     const fetchSegmentationData = async () => {
         try {
             console.log("Fetching segmentation data...");
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://geosense-ai-l5ng.onrender.com'}/get-segments`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://geosense-ai-f5ng.onrender.com'}/get-segments`);
             if (response.ok) {
                 const data = await response.json();
                 if (data.status === 'success') {

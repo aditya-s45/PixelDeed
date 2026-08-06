@@ -15,7 +15,7 @@ const FeatureCard = ({ feature, setEditDetails, searchTerm, onSegmentationComple
         if (detecting) {
             interval = setInterval(async () => {
                 try {
-                    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://geosense-ai-l5ng.onrender.com'}/status`);
+                    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://geosense-ai-f5ng.onrender.com'}/status`);
                     if (res.ok) {
                         const data = await res.json();
                         setProgress(data.progress || 0);
@@ -49,7 +49,7 @@ const FeatureCard = ({ feature, setEditDetails, searchTerm, onSegmentationComple
         setDetecting(true);
         console.log(`Sending Min and Max values to server: ${min}, ${max}`);
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://geosense-ai-l5ng.onrender.com'}/minmax`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://geosense-ai-f5ng.onrender.com'}/minmax`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
