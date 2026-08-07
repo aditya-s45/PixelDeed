@@ -97,24 +97,29 @@ export default function LandingPage() {
                             </h2>
                             <div className="w-20 h-1 bg-gradient-to-r from-blue-500 to-cyan-400 mb-8 rounded-full"></div>
 
-                            <div className="space-y-4 text-lg text-slate-300 font-mono">
-                                <DecryptedText
-                                    text="> Initializing HQ-SAM AI models..."
-                                    animateOn="view" speed={60} maxIterations={10} revealDirection="start"
-                                />
-                                <DecryptedText
-                                    text="> Establishing Web3 connection protocols..."
-                                    animateOn="view" speed={60} maxIterations={10} revealDirection="start"
-                                />
-                                <div className="h-4"></div>
-                                <DecryptedText
-                                    text="GeoSense is a premium platform for measuring land area effortlessly. Draw a boundary, and our AI automatically segments parcels from high-resolution satellite imagery."
-                                    animateOn="view" speed={30} maxIterations={5} revealDirection="start"
-                                />
-                                <DecryptedText
-                                    text="Whether for real estate, agriculture, or urban planning, GeoSense makes land measurement simple, precise, and ready for on-chain tokenization."
-                                    animateOn="view" speed={30} maxIterations={5} revealDirection="start"
-                                />
+                            <div className="space-y-6 text-slate-300">
+                                <div className="font-mono text-blue-400 text-sm md:text-base mb-6 space-y-2 bg-blue-900/10 p-5 rounded-xl border border-blue-500/20 shadow-[inset_0_0_20px_rgba(59,130,246,0.05)] w-fit">
+                                    <div className="block">
+                                        <DecryptedText
+                                            text="> Initializing HQ-SAM AI models..."
+                                            animateOn="view" speed={60} maxIterations={10} revealDirection="start"
+                                        />
+                                    </div>
+                                    <div className="block">
+                                        <DecryptedText
+                                            text="> Establishing Web3 connection protocols..."
+                                            animateOn="view" speed={60} maxIterations={10} revealDirection="start"
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div className="text-xl md:text-2xl leading-relaxed text-slate-200 font-medium max-w-xl">
+                                    GeoSense is a premium platform for measuring land area effortlessly. Draw a boundary, and our AI automatically segments parcels from high-resolution satellite imagery.
+                                </div>
+                                
+                                <div className="text-base md:text-lg leading-relaxed text-slate-400 max-w-xl pt-2">
+                                    Whether for real estate, agriculture, or urban planning, GeoSense makes land measurement simple, precise, and ready for on-chain tokenization.
+                                </div>
                             </div>
 
                             {/* CTA Button */}
