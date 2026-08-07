@@ -33,8 +33,8 @@ export default function LandingPage() {
 
             {/* Content */}
             <motion.div
-                className="relative z-10 text-center text-white px-6 w-full max-w-5xl"
-                animate={animate ? { x: "-30%", y: "10%" } : { x: 0, y: 0 }}
+                className="relative z-10 text-center text-white px-8 md:px-16 w-full max-w-5xl"
+                animate={animate ? { x: "-10%", y: "10%" } : { x: 0, y: 0 }}
                 transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
             >
                 <motion.div
