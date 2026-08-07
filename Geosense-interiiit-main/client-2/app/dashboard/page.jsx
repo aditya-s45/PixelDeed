@@ -21,25 +21,42 @@ export default function Dashboard() {
     async function fetchPortfolio() {
       if (!address || !publicClient) return;
       try {
-        const logs = await publicClient.getLogs({
-          address: GEO_NFT_ADDRESS,
-          event: parseAbiItem('event LandTokenized(uint256 indexed tokenId, address owner, uint256 areaSqMeters, uint256 estimatedValue)'),
-          fromBlock: 'earliest'
-        });
-
-        // Filter for this user's mints
-        const userMints = logs.filter(log => log.args.owner?.toLowerCase() === address.toLowerCase());
-        
         let totalArea = 0;
         let totalValue = 0;
+        let count = 0;
+        let tokenId = 0;
         
-        userMints.forEach(log => {
-          totalArea += Number(log.args.areaSqMeters);
-          totalValue += Number(log.args.estimatedValue);
-        });
+        // Loop through tokens until we hit one that doesn't exist
+        while (true) {
+          try {
+            const currentOwner = await publicClient.readContract({
+              address: GEO_NFT_ADDRESS,
+              abi: GeoNFTABI,
+              functionName: 'ownerOf',
+              args: [tokenId]
+            });
+            
+            if (currentOwner.toLowerCase() === address.toLowerCase()) {
+              const details = await publicClient.readContract({
+                address: GEO_NFT_ADDRESS,
+                abi: GeoNFTABI,
+                functionName: 'landParcels',
+                args: [tokenId]
+              });
+              
+              count++;
+              totalArea += Number(details[1]); // areaSqMeters
+              totalValue += Number(details[2]); // estimatedValue
+            }
+            tokenId++;
+          } catch (e) {
+            // Token doesn't exist, we reached the end
+            break;
+          }
+        }
 
         setStats({
-          count: userMints.length,
+          count,
           area: (totalArea / 10000).toFixed(4), // Convert sqm to hectares
           value: totalValue.toLocaleString()
         });

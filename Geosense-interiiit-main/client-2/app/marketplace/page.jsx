@@ -42,34 +42,38 @@ export default function Marketplace() {
     setLoading(true);
     try {
       // 1. Fetch all NFTs minted to find which ones the user owns
-      const mintLogs = await publicClient.getLogs({
-        address: GEO_NFT_ADDRESS,
-        event: parseAbiItem('event LandTokenized(uint256 indexed tokenId, address owner, uint256 areaSqMeters, uint256 estimatedValue)'),
-        fromBlock: 'earliest'
-      });
-
-      // Find user's NFTs
       const owned = [];
+      let tokenId = 0;
+      
       if (address) {
-        for (const log of mintLogs) {
-          // Check current owner by calling the contract directly
+        // Loop through tokens until we hit one that doesn't exist
+        while (true) {
           try {
             const currentOwner = await publicClient.readContract({
               address: GEO_NFT_ADDRESS,
               abi: GeoNFTABI,
               functionName: 'ownerOf',
-              args: [log.args.tokenId]
+              args: [tokenId]
             });
             
             if (currentOwner.toLowerCase() === address.toLowerCase()) {
+              const details = await publicClient.readContract({
+                address: GEO_NFT_ADDRESS,
+                abi: GeoNFTABI,
+                functionName: 'landParcels',
+                args: [tokenId]
+              });
+              
               owned.push({
-                tokenId: Number(log.args.tokenId),
-                area: (Number(log.args.areaSqMeters) / 10000).toFixed(4),
-                estimatedValue: Number(log.args.estimatedValue)
+                tokenId: Number(tokenId),
+                area: (Number(details[1]) / 10000).toFixed(4),
+                estimatedValue: Number(details[2])
               });
             }
+            tokenId++;
           } catch (e) {
-            // Token might not exist or burned
+            // Token doesn't exist, we reached the end
+            break;
           }
         }
       }
