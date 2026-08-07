@@ -15,7 +15,7 @@ const FeatureCard = ({ feature, setEditDetails, searchTerm, onSegmentationComple
         if (detecting) {
             interval = setInterval(async () => {
                 try {
-                    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:5010'}/status`);
+                    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:7860'}/status`);
                     if (res.ok) {
                         const data = await res.json();
                         setProgress(data.progress || 0);
@@ -49,7 +49,7 @@ const FeatureCard = ({ feature, setEditDetails, searchTerm, onSegmentationComple
         setDetecting(true);
         console.log(`Sending Min and Max values to server: ${min}, ${max}`);
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:5010'}/minmax`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:7860'}/minmax`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
