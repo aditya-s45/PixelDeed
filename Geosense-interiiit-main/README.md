@@ -31,15 +31,15 @@
 - [The Problem](#-the-problem)
 - [The Solution](#-the-solution)
 - [Features](#-features)
-- [Architecture](#-architecture)
-- [Tech Stack](#-tech-stack)
+- [Tech Stack](#️-tech-stack)
+- [System Architecture](#️-system-architecture)
 - [How It Works](#-how-it-works)
 - [Project Structure](#-project-structure)
 - [Installation](#-installation)
-- [Usage](#-usage)
+- [Usage](#️-usage)
 - [Smart Contracts](#-smart-contracts)
-- [AI Engine Deep Dive](#-ai-engine-deep-dive)
 - [API Reference](#-api-reference)
+- [AI Engine Deep Dive](#-ai-engine-deep-dive)
 - [Contributing](#-contributing)
 - [License](#-license)
 
@@ -98,259 +98,241 @@ Land ownership is one of the most broken systems on the planet. Here's why:
 
 ## ✨ Features
 
-### 🛰️ Satellite Imagery Engine
-- Multi-threaded tile downloading from Google Maps satellite layer (zoom 18 = ~0.6m/pixel)
-- Automatic zoom-level reduction if requested area exceeds 100 tiles (prevents rate-limiting)
-- Concurrent 10-thread `ThreadPoolExecutor` for parallel fetching of 256×256 tiles
-- Spatial affine transform matrix computed via `rasterio.transform.from_bounds()`
-- Output: Georeferenced 3-band RGB GeoTIFF with `EPSG:4326` CRS
-
-### 🧠 AI Land Segmentation (HQ-SAM)
-- Meta's **High-Quality Segment Anything Model** with ViT-H backbone (~2.5GB)
-- 95% IoU confidence threshold filters out low-quality detections
-- Automatic CPU fallback via `torch.load` monkey-patch (no GPU required)
-- Raster-to-vector conversion: binary masks → `shapely` polygon geometries
-- Serialized as `GeoDataFrame` pickle for instant retrieval
-
-### 📐 Geodesic Area Calculator
-- **Not** projected area (which distorts near the poles) — true **geodesic** area
-- Uses `pyproj.Geod(ellps='WGS84')` for ellipsoidal calculations
-- Accurate to centimeter-level precision on any coordinate on Earth
-- Supports multi-polygon unions for combined parcel calculations
-
-### 🌿 AI Land Valuation Engine
-- Masks each polygon on the satellite GeoTIFF to extract pixel data
-- Computes mean Red, Green, Blue channel intensities per parcel
-- Calculates pseudo-NDVI Greenness Index for land classification
-- Three-tier quality grading with price multipliers:
-
-| Greenness Index | Classification | Multiplier | Example |
-|---|---|---|---|
-| `> 0.05` | 🌿 Lush Vegetation | 1.5× | Farmland, forests |
-| `< -0.05` | 🏙️ Urban / Developed | 2.0× | Cities, buildings |
-| Otherwise | 🏜️ Barren / Scrub | 0.8× | Desert, wasteland |
-
-> **Base rate:** 100 GEO tokens per hectare (10,000 m²)
-
-### 🪙 ERC-721 Land NFTs
-- Each land parcel minted as a unique NFT on Ethereum Sepolia
-- On-chain metadata: `coordinates` (GeoJSON), `areaSqMeters`, `estimatedValue`, `originalTokenizer`, `timestamp`
-- Full `getLandDetails()` function for programmatic access
-- Compatible with OpenSea and all ERC-721 marketplaces
-
-### 🏪 P2P Marketplace with Escrow
-- Sellers list their GeoNFT at a price in GEO tokens
-- NFT is transferred to the `LandEscrow` contract (trustless custody)
-- Buyers approve & fund the escrow with GEO tokens
-- Either party completes the swap: NFT → Buyer, GEO → Seller
-- Protected by `ReentrancyGuard` against re-entrancy attacks
-
-### 🗳️ DAO Governance
-- Token-weighted voting on platform proposals
-- Minimum quorum: 1,000 GEO tokens to create proposals
-- Configurable voting periods
-- On-chain execution tracking
-
-### 🗺️ GeoJSON Export
-- One-click download of your NFT's exact polygon boundaries
-- Standard `.geojson` FeatureCollection format
-- Directly importable into QGIS, ArcGIS, Google Earth Pro, Mapbox
-
-### 📊 Portfolio Dashboard
-- Visual property cards for every owned GeoNFT
-- Displays Token ID, area (hectares), estimated value (GEO)
-- Total portfolio stats: parcels owned, total area, total value
-- Direct blockchain queries via `ownerOf()` + `landParcels()` calls
-
-### 🎨 Premium UI
-- Glassmorphism design system with `backdrop-blur` + translucent borders
-- Dark space theme (`#0a0a0f` background)
-- Framer Motion page transitions and micro-animations
-- Custom `DecryptedText` scramble effect on the landing page
-- Geist font family (Sans + Mono)
-- Fully responsive mobile layout
-
----
-
-## 🏗️ Architecture
-
-```
-┌────────────────────────────────────────────────────────────────────────────┐
-│                         GEOSENSE SYSTEM ARCHITECTURE                       │
-├────────────────────────────────────────────────────────────────────────────┤
-│                                                                            │
-│  ┌──────────────────────────────────┐    REST API    ┌──────────────────┐  │
-│  │     FRONTEND (Next.js 16)        │◄──────────────►│   BACKEND        │  │
-│  │     Port 3000                    │   /minmax      │   (Flask)        │  │
-│  │                                  │   /status      │   Port 7860      │  │
-│  │  • React 19 + Tailwind v4        │   /get-segments│                  │  │
-│  │  • Leaflet + Draw Tools          │   /calc-areas  │  • HQ-SAM AI     │  │
-│  │  • Wagmi + RainbowKit            │                │  • Tile Fetcher   │  │
-│  │  • Framer Motion                 │                │  • Geodesic Calc  │  │
-│  │  • GeoJSON Rendering             │                │  • Spectral Val.  │  │
-│  └─────────────┬────────────────────┘                └────────┬─────────┘  │
-│                │                                              │            │
-│                │ Wagmi writeContract()                         │            │
-│                │ Viem readContract()                           │            │
-│                ▼                                              ▼            │
-│  ┌──────────────────────────────────┐         ┌──────────────────────────┐ │
-│  │     ETHEREUM SEPOLIA             │         │     TEMP FILE SYSTEM     │ │
-│  │                                  │         │                          │ │
-│  │  ┌────────────┐ ┌─────────────┐  │         │  temp/imagery/           │ │
-│  │  │ GeoToken   │ │ GeoNFT      │  │         │    └── temp_satellite.tif│ │
-│  │  │ (ERC-20)   │ │ (ERC-721)   │  │         │  temp/segmentation/      │ │
-│  │  │            │ │             │  │         │    ├── temp_masks.tif     │ │
-│  │  │ 10M supply │ │ Land Deeds  │  │         │    ├── temp_polygons.pkl │ │
-│  │  └─────┬──────┘ └──────┬──────┘  │         │    └── temp_polygons.shp │ │
-│  │        │                │         │         └──────────────────────────┘ │
-│  │        ▼                ▼         │                                      │
-│  │  ┌────────────┐ ┌─────────────┐  │                                      │
-│  │  │LandEscrow  │ │ GeoDAO      │  │                                      │
-│  │  │(P2P Trade) │ │(Governance) │  │                                      │
-│  │  └────────────┘ └─────────────┘  │                                      │
-│  └──────────────────────────────────┘                                      │
-│                                                                            │
-└────────────────────────────────────────────────────────────────────────────┘
-```
-
-### Data Flow
-
-```
-User draws bounding box on satellite map
-        │
-        ▼
-┌─────────────────────────────────────────┐
-│  STEP 1: SATELLITE DOWNLOAD             │  ~3-8s
-│  ├─ Convert WGS84 bbox → tile grid     │
-│  ├─ Download 256×256 tiles (10 threads) │
-│  ├─ Stitch into single RGB image        │
-│  ├─ Compute affine transform matrix     │
-│  └─ Save as GeoTIFF (EPSG:4326)         │
-└──────────────┬──────────────────────────┘
-               ▼
-┌─────────────────────────────────────────┐
-│  STEP 2: AI SEGMENTATION                │  ~15-45s
-│  ├─ Convert GeoTIFF → PNG               │
-│  ├─ Load HQ-SAM ViT-H (2.5GB)          │
-│  ├─ Run automatic mask generation       │
-│  ├─ Filter: IoU ≥ 0.90, stability ≥ 0.95│
-│  ├─ Remove micro-artifacts (< 5000 px)  │
-│  ├─ Generate binary mask GeoTIFF        │
-│  └─ Convert raster masks → polygons     │
-└──────────────┬──────────────────────────┘
-               ▼
-┌─────────────────────────────────────────┐
-│  STEP 3: ANALYSIS & VALUATION           │  ~1-2s
-│  ├─ Reproject polygons to WGS84         │
-│  ├─ Compute geodesic area (pyproj)      │
-│  ├─ Mask satellite image per polygon    │
-│  ├─ Extract mean R, G, B intensities    │
-│  ├─ Calculate pseudo-NDVI greenness     │
-│  ├─ Classify: Lush / Urban / Barren     │
-│  ├─ Apply price multiplier              │
-│  └─ Return GeoJSON with metadata        │
-└──────────────┬──────────────────────────┘
-               ▼
-┌─────────────────────────────────────────┐
-│  STEP 4: INTERACTIVE SELECTION          │  User action
-│  ├─ Render polygons on Leaflet map      │
-│  ├─ User clicks to select parcels       │
-│  ├─ Calculate combined area             │
-│  └─ Show AI appraisal (quality + GEO)   │
-└──────────────┬──────────────────────────┘
-               ▼
-┌─────────────────────────────────────────┐
-│  STEP 5: BLOCKCHAIN MINTING            │  ~15-30s
-│  ├─ Pack coordinates as GeoJSON string  │
-│  ├─ Call tokenizeLand() on GeoNFT       │
-│  ├─ ⏸️  User confirms in MetaMask        │
-│  ├─ Store on-chain: coords, area, value │
-│  └─ NFT minted to user's wallet         │
-└──────────────┬──────────────────────────┘
-               ▼
-┌─────────────────────────────────────────┐
-│  STEP 6: POST-MINT OPTIONS              │
-│  ├─ View in Portfolio Dashboard         │
-│  ├─ Export boundaries as .geojson       │
-│  ├─ List for sale on P2P Marketplace    │
-│  └─ Vote on DAO governance proposals    │
-└─────────────────────────────────────────┘
-               │
-               ▼
-            DONE 🎉
-```
+| Feature | Description |
+|:---|:---|
+| 🛰️ **Satellite Imagery Engine** | High-resolution Google satellite tile fetching with automatic zoom calibration and concurrent multi-threaded download |
+| 🧠 **HQ-SAM AI Segmentation** | Meta's Segment Anything Model (High-Quality variant) auto-detects land parcels from satellite imagery with 95% IoU confidence |
+| 📐 **Geodesic Area Calculation** | WGS84 ellipsoidal geodesic area computation using `pyproj` — accurate to centimeter precision |
+| 🌿 **AI Land Valuation** | Spectral analysis of RGB channels computes pseudo-NDVI greenness index to classify land quality and estimate value |
+| 🪙 **ERC-721 Land NFTs** | Each land parcel is minted as a unique NFT with on-chain metadata: coordinates, area (m²), estimated value, and timestamp |
+| 💰 **GEO Utility Token** | ERC-20 governance token used for land valuation, marketplace transactions, and DAO voting |
+| 🏪 **P2P Marketplace** | Trustless escrow-based land trading: list your parcel, buyers fund escrow, smart contract handles atomic swap |
+| 🗳️ **DAO Governance** | On-chain proposal creation and token-weighted voting for platform decisions |
+| 🗺️ **GeoJSON Export** | Download your NFT's exact vector polygon boundaries as industry-standard GeoJSON — importable into QGIS, ArcGIS, and Google Earth |
+| 📊 **Portfolio Dashboard** | Visual property cards showing all owned land parcels with area, value, and export functionality |
+| 🦊 **MetaMask Integration** | Seamless wallet connection via RainbowKit with multi-chain support |
+| 🎨 **Glassmorphic UI** | Dark-mode, premium UI with animated transitions, Framer Motion effects, and responsive design |
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Frontend
+<div align="center">
 
-| Layer | Technology | Version | Purpose |
-|---|---|---|---|
-| **Framework** | Next.js (App Router) | 16.3 | SSR, routing, React Server Components |
-| **UI Library** | React | 19 RC | Component-based UI rendering |
-| **Styling** | Tailwind CSS | 4.0 | Utility-first CSS with custom theme |
-| **Animations** | Framer Motion | 12.x | Page transitions, micro-interactions |
-| **Maps** | Leaflet + React-Leaflet | 1.9 / 5.0 | Interactive satellite maps |
-| **Drawing** | Leaflet-Draw | 1.0.4 | Bounding box rectangle tool |
-| **Search** | Leaflet-GeoSearch | 4.2 | Location search bar |
-| **Web3 Wallet** | RainbowKit | 2.2 | MetaMask connection modal |
-| **Ethereum Hooks** | Wagmi | 2.19 | `useWriteContract`, `useReadContract` |
-| **Ethereum Client** | Viem | 2.38 | Low-level blockchain reads |
-| **State** | TanStack React Query | 5.x | Server state caching |
-| **UI Primitives** | Radix UI | Latest | Accessible accordion, dialog, tabs |
-| **Typography** | Geist (Sans + Mono) | — | Vercel's modern font family |
+### Frontend
+<p>
+  <img src="https://skillicons.dev/icons?i=nextjs,react,tailwind,js" alt="Frontend Stack" />
+</p>
+
+| Technology | Version | Purpose |
+|:---|:---|:---|
+| **Next.js** | 16.3 | React framework with App Router & SSR |
+| **React** | 19 RC | UI component library |
+| **Tailwind CSS** | 4.0 | Utility-first CSS framework |
+| **Framer Motion** | 12.x | Animation library |
+| **Leaflet** | 1.9 | Interactive maps & drawing tools |
+| **RainbowKit** | 2.2 | Web3 wallet connection modal |
+| **Wagmi** | 2.19 | React hooks for Ethereum |
+| **Viem** | 2.38 | TypeScript Ethereum interface |
+| **Radix UI** | Latest | Accessible UI primitives |
+
+---
 
 ### Backend
+<p>
+  <img src="https://skillicons.dev/icons?i=python,flask,pytorch,docker" alt="Backend Stack" />
+</p>
 
-| Layer | Technology | Version | Purpose |
-|---|---|---|---|
-| **Runtime** | Python | 3.11 | Backend language |
-| **Web Server** | Flask | 3.0 | REST API routing |
-| **CORS** | Flask-CORS | 4.0 | Cross-origin request handling |
-| **AI Model** | HQ-SAM (samgeo) | ViT-H | Land parcel segmentation |
-| **Deep Learning** | PyTorch | Latest | Model inference engine |
-| **Computer Vision** | OpenCV | 4.8 | Image processing |
-| **Raster I/O** | Rasterio | 1.3 | GeoTIFF read/write/masking |
-| **Geospatial** | GeoPandas | 0.14 | Spatial DataFrames & GeoJSON |
-| **Projections** | PyProj | 3.6 | WGS84 geodesic area calc |
-| **Geometry** | Shapely | 2.0 | Polygon manipulation |
-| **Image Processing** | Pillow | 10.1 | Tile stitching |
-| **HTTP** | Requests | 2.31 | Satellite tile download |
-| **Concurrency** | concurrent.futures | stdlib | 10-thread parallel downloads |
-| **Visualization** | Matplotlib | 3.8 | Segmentation overlay plots |
+| Technology | Version | Purpose |
+|:---|:---|:---|
+| **Python** | 3.11 | Backend runtime |
+| **Flask** | 3.0 | REST API server |
+| **HQ-SAM** | ViT-H | High-Quality Segment Anything Model |
+| **PyTorch** | Latest | Deep learning inference engine |
+| **Rasterio** | 1.3 | GeoTIFF raster I/O |
+| **GeoPandas** | 0.14 | Geospatial DataFrames |
+| **PyProj** | 3.6 | WGS84 geodesic calculations |
+| **OpenCV** | 4.8 | Computer vision processing |
+| **Pillow** | 10.1 | Image stitching & manipulation |
+
+---
 
 ### Blockchain
+<p>
+  <img src="https://skillicons.dev/icons?i=solidity" alt="Blockchain Stack" />
+  <img src="https://img.shields.io/badge/Hardhat-FFF100?style=for-the-badge&logo=hardhat&logoColor=black" alt="Hardhat" />
+  <img src="https://img.shields.io/badge/OpenZeppelin-4E5EE4?style=for-the-badge&logo=openzeppelin&logoColor=white" alt="OpenZeppelin" />
+</p>
 
-| Layer | Technology | Version | Purpose |
-|---|---|---|---|
-| **Language** | Solidity | 0.8.24 | Smart contract development |
-| **Framework** | Hardhat | 2.22 | Compile, test, deploy |
-| **Standards** | OpenZeppelin | 5.0 | ERC-20, ERC-721, Ownable, ReentrancyGuard |
-| **Network** | Ethereum Sepolia | — | Testnet deployment |
-| **RPC Provider** | Alchemy | — | Blockchain node access |
-| **Deployment** | Hardhat scripts | — | Automated contract deployment |
+| Technology | Version | Purpose |
+|:---|:---|:---|
+| **Solidity** | 0.8.24 | Smart contract language |
+| **Hardhat** | 2.22 | Ethereum development environment |
+| **OpenZeppelin** | 5.0 | Audited contract standards (ERC20, ERC721) |
+| **Alchemy** | — | Sepolia RPC provider |
+| **Ethers.js** | 6.x | Contract deployment & interaction |
 
-### Infrastructure
+</div>
 
-| Tool | Purpose |
-|---|---|
-| **Docker** | Containerized backend deployment |
-| **Google Maps Tiles** | Satellite imagery source |
-| **HuggingFace** | HQ-SAM model hosting & download |
-| **Alchemy** | Sepolia RPC endpoint |
-| **WalletConnect** | Multi-wallet support |
+---
+
+## 🏗️ System Architecture
+
+```mermaid
+flowchart TB
+    subgraph USER["👤 User Browser"]
+        A["Next.js 16 Frontend<br/>(React 19 + Tailwind 4)"]
+        B["Leaflet Map + Draw Tools"]
+        C["RainbowKit + MetaMask"]
+    end
+
+    subgraph BACKEND["🐍 Python Backend (Flask)"]
+        D["REST API Server<br/>(Port 7860)"]
+        E["Satellite Tile Downloader<br/>(Google Maps Tiles)"]
+        F["HQ-SAM AI Engine<br/>(ViT-H Model ~2.5GB)"]
+        G["Geodesic Calculator<br/>(PyProj WGS84)"]
+        H["Spectral Valuation Engine<br/>(Pseudo-NDVI)"]
+    end
+
+    subgraph BLOCKCHAIN["⛓️ Ethereum Sepolia"]
+        I["GeoToken.sol<br/>(ERC-20)"]
+        J["GeoNFT.sol<br/>(ERC-721)"]
+        K["LandEscrow.sol<br/>(P2P Trading)"]
+        L["GeoDAO.sol<br/>(Governance)"]
+    end
+
+    subgraph STORAGE["📁 Temp Storage"]
+        M["temp_satellite.tif<br/>(GeoTIFF)"]
+        N["temp_masks.tif<br/>(Binary Masks)"]
+        O["temp_polygons.pkl<br/>(GeoDataFrame)"]
+    end
+
+    A -->|"Draw BBox"| B
+    B -->|"POST /minmax"| D
+    D -->|"Fetch tiles"| E
+    E -->|"Stitch GeoTIFF"| M
+    D -->|"Run segmentation"| F
+    F -->|"Generate masks"| N
+    F -->|"Extract polygons"| O
+    A -->|"GET /get-segments"| D
+    D -->|"Compute area"| G
+    D -->|"Appraise value"| H
+    H -->|"Return GeoJSON"| A
+    A -->|"Mint NFT"| C
+    C -->|"tokenizeLand()"| J
+    C -->|"createEscrow()"| K
+    C -->|"vote()"| L
+    J -.->|"GEO payments"| I
+    K -.->|"Escrow funds"| I
+
+    style USER fill:#0f172a,stroke:#3b82f6,color:#fff
+    style BACKEND fill:#0f172a,stroke:#10b981,color:#fff
+    style BLOCKCHAIN fill:#0f172a,stroke:#a855f7,color:#fff
+    style STORAGE fill:#0f172a,stroke:#f59e0b,color:#fff
+```
+
+### Data Flow Summary
+
+```
+📍 User draws bounding box on satellite map
+       ↓
+🛰️ Backend fetches high-res Google satellite tiles (zoom 18)
+       ↓
+🧩 Tiles stitched into georeferenced GeoTIFF (EPSG:4326)
+       ↓
+🧠 HQ-SAM segments land parcels with 95% IoU confidence
+       ↓
+📐 PyProj computes geodesic area on WGS84 ellipsoid
+       ↓
+🌿 Spectral analysis classifies: Lush | Urban | Barren
+       ↓
+💰 AI appraises value: 100 GEO/hectare × quality multiplier
+       ↓
+🪙 User mints ERC-721 NFT with on-chain metadata
+       ↓
+🏪 NFT tradeable on P2P escrow marketplace
+```
 
 ---
 
 ## ⚙️ How It Works
 
-### The AI Pipeline — Technical Deep Dive
+The platform executes a **6-step pipeline**, each step building on the previous:
 
-#### 1. Coordinate → Tile Conversion
+### Step-by-Step Execution Flow
 
-GeoSense converts latitude/longitude coordinates to Google Maps tile indices using the [Slippy Map Tilenames](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames) convention:
+```
+ START
+   │
+   ▼
+┌──────────────────────────────────────────┐
+│  STEP 1: SATELLITE DOWNLOAD              │  ~3-8s
+│  ├─ Convert WGS84 bbox → tile grid      │
+│  ├─ Download 256×256 tiles (10 threads)  │
+│  ├─ Auto-reduce zoom if > 100 tiles     │
+│  ├─ Stitch into single RGB image         │
+│  ├─ Compute affine transform matrix      │
+│  └─ Save as GeoTIFF (EPSG:4326)          │
+└──────────────────┬───────────────────────┘
+                   ▼
+┌──────────────────────────────────────────┐
+│  STEP 2: AI SEGMENTATION                 │  ~15-45s
+│  ├─ Convert GeoTIFF → PNG                │
+│  ├─ Load HQ-SAM ViT-H model (2.5GB)     │
+│  ├─ Run automatic mask generation        │
+│  ├─ Filter: IoU ≥ 0.90, stability ≥ 0.95│
+│  ├─ Remove micro-artifacts (< 5000 px)   │
+│  ├─ Generate binary mask GeoTIFF         │
+│  └─ Convert raster masks → polygons      │
+└──────────────────┬───────────────────────┘
+                   ▼
+┌──────────────────────────────────────────┐
+│  STEP 3: ANALYSIS & VALUATION            │  ~1-2s
+│  ├─ Reproject polygons to WGS84          │
+│  ├─ Compute geodesic area (pyproj)       │
+│  ├─ Mask satellite image per polygon     │
+│  ├─ Extract mean R, G, B intensities     │
+│  ├─ Calculate pseudo-NDVI greenness      │
+│  ├─ Classify: Lush / Urban / Barren      │
+│  ├─ Apply price multiplier               │
+│  └─ Return GeoJSON with metadata         │
+└──────────────────┬───────────────────────┘
+                   ▼
+┌──────────────────────────────────────────┐
+│  STEP 4: INTERACTIVE SELECTION           │  User action
+│  ├─ Render polygons on Leaflet map       │
+│  ├─ User clicks to select parcels        │
+│  ├─ Highlight selected (blue overlay)    │
+│  ├─ Calculate combined area              │
+│  └─ Show AI appraisal (quality + GEO)    │
+└──────────────────┬───────────────────────┘
+                   ▼
+┌──────────────────────────────────────────┐
+│  STEP 5: BLOCKCHAIN MINTING             │  ~15-30s
+│  ├─ Pack coordinates as GeoJSON string   │
+│  ├─ Call tokenizeLand() on GeoNFT        │
+│  ├─ ⏸️  User confirms in MetaMask         │
+│  ├─ Store on-chain: coords, area, value  │
+│  └─ NFT minted to user's wallet          │
+└──────────────────┬───────────────────────┘
+                   ▼
+┌──────────────────────────────────────────┐
+│  STEP 6: POST-MINT OPTIONS               │
+│  ├─ View in Portfolio Dashboard          │
+│  ├─ Export boundaries as .geojson        │
+│  ├─ List for sale on P2P Marketplace     │
+│  └─ Vote on DAO governance proposals     │
+└──────────────────────────────────────────┘
+                   │
+                   ▼
+                DONE 🎉
+```
+
+### Key Technical Details
+
+#### Coordinate → Tile Conversion
+
+GeoSense converts lat/lng to Google Maps tile indices using the [Slippy Map](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames) convention:
 
 ```python
 def deg2num(lat_deg, lon_deg, zoom):
@@ -362,9 +344,9 @@ def deg2num(lat_deg, lon_deg, zoom):
     return (xtile, ytile)
 ```
 
-#### 2. Concurrent Tile Download
+#### Concurrent Tile Download
 
-Instead of downloading tiles one-by-one (which would take 30+ seconds for a 50-tile region), GeoSense uses a 10-thread pool:
+Instead of sequential downloads (~30s), GeoSense uses a 10-thread pool:
 
 ```python
 with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
@@ -375,9 +357,9 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
     }
 ```
 
-#### 3. GeoTIFF Stitching
+#### GeoTIFF Stitching
 
-Individual tiles are stitched into a single image and saved as a georeferenced GeoTIFF:
+Individual tiles are stitched and saved as a georeferenced GeoTIFF with proper spatial metadata:
 
 ```python
 transform = from_bounds(
@@ -393,53 +375,9 @@ with rasterio.open(output_path, 'w', driver='GTiff',
     dst.write(img_array)
 ```
 
-#### 4. HQ-SAM Segmentation
+#### CPU Compatibility Patch
 
-The segmentation engine uses carefully tuned parameters for land detection:
-
-```python
-sam_kwargs = {
-    "points_per_side": 24,          # Grid sampling density
-    "pred_iou_thresh": 0.90,        # 90% IoU confidence minimum
-    "stability_score_thresh": 0.95, # 95% mask stability
-    "min_mask_region_area": 5000,   # Ignore < 5000px artifacts
-    "box_nms_thresh": 0.7,          # Non-max suppression
-    "crop_nms_thresh": 0.7,         # Crop overlap handling
-    "crop_overlap_ratio": 0.34,     # Overlap between crop regions
-}
-```
-
-#### 5. Spectral Land Valuation
-
-Each detected parcel is individually masked on the satellite image to extract its RGB pixel values, then classified using a pseudo-NDVI Greenness Index:
-
-```python
-# Extract mean channel intensities for the parcel
-r = np.mean(out_image[0][mask])  # Red channel
-g = np.mean(out_image[1][mask])  # Green channel
-b = np.mean(out_image[2][mask])  # Blue channel
-
-# Pseudo-NDVI: measures vegetation density
-greenness = (g - r) / (g + r + 0.01)
-
-# Classification & pricing
-if greenness > 0.05:
-    quality = "Lush Vegetation"   # Farmland, forests
-    multiplier = 1.5
-elif greenness < -0.05:
-    quality = "Urban / Developed"  # Buildings, roads
-    multiplier = 2.0
-else:
-    quality = "Barren / Scrub"     # Wasteland, desert
-    multiplier = 0.8
-
-# Base: 100 GEO tokens per hectare × quality multiplier
-estimated_value = round((area / 10000) * 100 * multiplier)
-```
-
-#### 6. CPU Compatibility Patch
-
-HQ-SAM ships with CUDA-trained weights that crash on CPU-only machines. GeoSense solves this at the Python import level:
+HQ-SAM ships with CUDA-trained weights that crash on CPU-only machines. GeoSense patches this at the Python import level:
 
 ```python
 # Monkey-patch torch.load BEFORE importing samgeo
@@ -453,7 +391,7 @@ torch.load = cpu_torch_load  # All subsequent loads go to CPU
 from samgeo.hq_sam import SamGeo  # Now loads without CUDA error
 ```
 
-> This was a critical fix — without it, `torch.cuda.is_available() is False` causes an immediate crash during model deserialization.
+> Without this patch, `torch.cuda.is_available() is False` causes an immediate crash during model deserialization. This was a critical fix.
 
 ---
 
@@ -729,8 +667,49 @@ Click **"Mint GeoNFT for these Parcels"** → Confirm the MetaMask popup → Wai
 | `GET` | `/` | Health check | — | `{"status": "online", "version": "2.0"}` |
 | `GET` | `/status` | Poll pipeline progress | — | `{"status": "segmenting", "progress": 50}` |
 | `POST` | `/minmax` | Trigger download + segmentation | `{"min": [lat, lon], "max": [lat, lon]}` | `{"status": "success"}` |
-| `GET` | `/get-segments` | Fetch detected parcels | — | GeoJSON with area, quality, value |
+| `GET` | `/get-segments` | Fetch detected parcels with valuation | — | GeoJSON with area, quality, value |
 | `POST` | `/calculate-areas` | Compute areas for selected parcels | `{"selectedIds": [0, 1, 2]}` | `{"areas": {"0": 1234.56}}` |
+
+---
+
+## 🧠 AI Engine Deep Dive
+
+### Satellite Imagery Pipeline
+
+The backend uses a **multi-threaded tile stitching engine** that:
+1. Converts WGS84 bounding box → tile grid coordinates at zoom level 18
+2. Downloads 256×256px tiles concurrently (10 threads) from Google satellite servers
+3. Stitches tiles into a single georeferenced **GeoTIFF** with proper affine transform
+4. Auto-downsizes zoom level if tile count exceeds 100 (prevents rate limiting)
+
+### HQ-SAM Segmentation
+
+GeoSense uses **Meta's High-Quality Segment Anything Model (HQ-SAM)** with the **ViT-H** backbone:
+
+| Parameter | Value | Purpose |
+|:---|:---|:---|
+| `points_per_side` | 24 | Grid sampling density |
+| `pred_iou_thresh` | 0.90 | High confidence threshold |
+| `stability_score_thresh` | 0.95 | Mask stability filter |
+| `min_mask_region_area` | 5,000 | Removes micro-artifacts |
+| `box_nms_thresh` | 0.70 | Non-max suppression |
+
+### AI Land Valuation
+
+Each detected parcel undergoes **spectral analysis** using the RGB channels of the satellite imagery:
+
+```python
+# Pseudo-NDVI: measures vegetation density from satellite pixels
+greenness = (g - r) / (g + r + 0.01)
+```
+
+| Greenness | Classification | Price Multiplier |
+|:---|:---|:---|
+| > 0.05 | 🌿 Lush Vegetation | 1.5× |
+| < -0.05 | 🏙️ Urban / Developed | 2.0× |
+| Otherwise | 🏜️ Barren / Scrub | 0.8× |
+
+> **Base Rate:** 100 GEO tokens per hectare (10,000 m²)
 
 ---
 
