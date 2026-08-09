@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://img.icons8.com/3d-fluency/94/globe-earth.png" alt="PixelDeed Logo" width="100" height="100">
+  <img src="https://raw.githubusercontent.com/aditya-s45/PixelDeed/main/client-2/public/geosense_logo.png" alt="PixelDeed Logo" width="100" height="100">
 </p>
 
 <h1 align="center">🌍 PixelDeed</h1>
