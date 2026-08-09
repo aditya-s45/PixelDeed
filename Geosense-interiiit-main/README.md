@@ -496,8 +496,8 @@ PixelDeed/
 ### 1️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/aditya-s45/PixelDeed.git
-cd PixelDeed/PixelDeed-main
+git clone https://github.com/aditya-s45/PixelDeed2.git
+cd PixelDeed2/Geosense-interiiit-main
 ```
 
 ### 2️⃣ Setup the AI Backend
