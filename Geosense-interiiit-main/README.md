@@ -19,7 +19,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License">
-  <img src="https://img.shields.io/github/stars/aditya-s45/PixelDeed2?style=for-the-badge&logo=github" alt="GitHub Stars">
+  <img src="https://img.shields.io/github/stars/aditya-s45/PixelDeed?style=for-the-badge&logo=github" alt="GitHub Stars">
   <img src="https://img.shields.io/badge/Status-Hackathon_Ready-e94560?style=for-the-badge" alt="Hackathon Ready">
   <img src="https://img.shields.io/badge/Contracts-Deployed-purple?style=for-the-badge" alt="Deployed">
 </p>
@@ -496,8 +496,8 @@ PixelDeed/
 ### 1️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/aditya-s45/PixelDeed2.git
-cd PixelDeed2/Geosense-interiiit-main
+git clone https://github.com/aditya-s45/PixelDeed.git
+cd PixelDeed/PixelDeed-main
 ```
 
 ### 2️⃣ Setup the AI Backend
