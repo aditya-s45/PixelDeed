@@ -278,7 +278,7 @@ export default function Marketplace() {
             <div className="glass-panel p-20 text-center rounded-2xl border-white/5 border-dashed border-2 border-slate-700 bg-transparent flex flex-col items-center">
               <h2 className="text-xl font-semibold text-white mb-2">You don&apos;t own any land</h2>
               <p className="text-slate-400 max-w-md mb-6">Head to the Map Interface to discover and mint your first parcel.</p>
-              <a href="/geosense" className="bg-white/10 hover:bg-white/20 px-6 py-2 rounded-lg text-white text-sm">Go to Map</a>
+              <a href="/pixeldeed" className="bg-white/10 hover:bg-white/20 px-6 py-2 rounded-lg text-white text-sm">Go to Map</a>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

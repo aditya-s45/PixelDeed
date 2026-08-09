@@ -114,16 +114,16 @@ export default function LandingPage() {
                                 </div>
                                 
                                 <div className="text-xl md:text-2xl leading-relaxed text-slate-200 font-medium max-w-xl">
-                                    GeoSense is a premium platform for measuring land area effortlessly. Draw a boundary, and our AI automatically segments parcels from high-resolution satellite imagery.
+                                    PixelDeed is a premium platform for measuring land area effortlessly. Draw a boundary, and our AI automatically segments parcels from high-resolution satellite imagery.
                                 </div>
                                 
                                 <div className="text-base md:text-lg leading-relaxed text-slate-400 max-w-xl pt-2">
-                                    Whether for real estate, agriculture, or urban planning, GeoSense makes land measurement simple, precise, and ready for on-chain tokenization.
+                                    Whether for real estate, agriculture, or urban planning, PixelDeed makes land measurement simple, precise, and ready for on-chain tokenization.
                                 </div>
                             </div>
 
                             {/* CTA Button */}
-                            <Link href="/geosense">
+                            <Link href="/pixeldeed">
                                 <button className="mt-10 bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-lg font-bold px-8 py-4 rounded-full hover:from-blue-500 hover:to-cyan-400 transition-all shadow-[0_0_20px_rgba(59,130,246,0.5)] hover:shadow-[0_0_30px_rgba(34,211,238,0.7)] transform hover:scale-105 flex items-center gap-2">
                                     Launch Interface
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

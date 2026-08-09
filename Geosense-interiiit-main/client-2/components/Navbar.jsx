@@ -28,7 +28,7 @@ export default function Navbar() {
   }, []);
 
   const navItems = [
-    { name: 'Map Interface', href: '/geosense' },
+    { name: 'Map Interface', href: '/pixeldeed' },
     { name: 'Dashboard', href: '/dashboard' },
     { name: 'Marketplace', href: '/marketplace' },
   ];

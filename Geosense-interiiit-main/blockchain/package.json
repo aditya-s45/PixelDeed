@@ -1,7 +1,7 @@
 {
-  "name": "geosense-blockchain",
+  "name": "pixeldeed-blockchain",
   "version": "1.0.0",
-  "description": "Smart contracts for GeoSense Web3 platform",
+  "description": "Smart contracts for PixelDeed Web3 platform",
   "scripts": {
     "test": "hardhat test",
     "compile": "hardhat compile",

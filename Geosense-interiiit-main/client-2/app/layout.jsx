@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "GeoSense",
+  title: "PixelDeed",
   description: "Web3-powered geospatial intelligence platform",
 };
 

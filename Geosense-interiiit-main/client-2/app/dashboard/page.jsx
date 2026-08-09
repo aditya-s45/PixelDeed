@@ -126,7 +126,7 @@ export default function Dashboard() {
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600 mb-4 mx-auto"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
                 <h2 className="text-xl font-semibold text-white mb-2">No Land Parcels Yet</h2>
                 <p className="text-slate-400 max-w-md mx-auto mb-6">You haven't tokenized any land parcels yet. Head over to the map interface to measure and mint your first GeoNFT.</p>
-                <a href="/geosense" className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors border border-white/10">
+                <a href="/pixeldeed" className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors border border-white/10">
                   Go to Map Interface
                 </a>
               </div>
@@ -174,7 +174,7 @@ export default function Dashboard() {
                                 const url = URL.createObjectURL(blob);
                                 const a = document.createElement('a');
                                 a.href = url;
-                                a.download = `GeoSense_Parcel_${nft.tokenId}.geojson`;
+                                a.download = `PixelDeed_Parcel_${nft.tokenId}.geojson`;
                                 document.body.appendChild(a);
                                 a.click();
                                 document.body.removeChild(a);

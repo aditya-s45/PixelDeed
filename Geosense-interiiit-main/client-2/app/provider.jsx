@@ -10,7 +10,7 @@ import { mainnet, polygon, optimism, arbitrum, base, sepolia } from 'wagmi/chain
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const config = getDefaultConfig({
-  appName: 'GeoSense',
+  appName: 'PixelDeed',
   projectId: '69bbe334e45b61dbeed4fe180014403e',
   chains: [sepolia, mainnet, polygon, optimism, arbitrum, base],
 });

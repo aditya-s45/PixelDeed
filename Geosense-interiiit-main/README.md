@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="https://img.icons8.com/3d-fluency/94/globe-earth.png" alt="GeoSense Logo" width="100" height="100">
+  <img src="https://img.icons8.com/3d-fluency/94/globe-earth.png" alt="PixelDeed Logo" width="100" height="100">
 </p>
 
-<h1 align="center">🌍 GeoSense</h1>
+<h1 align="center">🌍 PixelDeed</h1>
 
 <p align="center">
   <strong>AI-Powered Satellite Land Segmentation → Blockchain NFT Tokenization — From pixel to deed in under 2 minutes.</strong>
@@ -19,7 +19,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License">
-  <img src="https://img.shields.io/github/stars/aditya-s45/GeoSense2?style=for-the-badge&logo=github" alt="GitHub Stars">
+  <img src="https://img.shields.io/github/stars/aditya-s45/PixelDeed2?style=for-the-badge&logo=github" alt="GitHub Stars">
   <img src="https://img.shields.io/badge/Status-Hackathon_Ready-e94560?style=for-the-badge" alt="Hackathon Ready">
   <img src="https://img.shields.io/badge/Contracts-Deployed-purple?style=for-the-badge" alt="Deployed">
 </p>
@@ -65,7 +65,7 @@ Land ownership is one of the most broken systems on the planet. Here's why:
 
 ## 💡 The Solution
 
-**GeoSense** replaces the entire $300B land surveying industry with a browser tab. You draw a box on a satellite map, AI detects the parcels, and a smart contract mints your deed — in **under 2 minutes**.
+**PixelDeed** replaces the entire $300B land surveying industry with a browser tab. You draw a box on a satellite map, AI detects the parcels, and a smart contract mints your deed — in **under 2 minutes**.
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -75,7 +75,7 @@ Land ownership is one of the most broken systems on the planet. Here's why:
 │   2. Click "Start AI Land Detection"                     │
 │   3. Confirm the MetaMask transaction                    │
 │                                                          │
-│            WHAT GEOSENSE DOES (everything else)          │
+│            WHAT PIXELDEED DOES (everything else)          │
 │                                                          │
 │   ✅ Downloads high-res satellite tiles (zoom level 18)   │
 │   ✅ Stitches tiles into a georeferenced GeoTIFF          │
@@ -332,7 +332,7 @@ The platform executes a **6-step pipeline**, each step building on the previous:
 
 #### Coordinate → Tile Conversion
 
-GeoSense converts lat/lng to Google Maps tile indices using the [Slippy Map](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames) convention:
+PixelDeed converts lat/lng to Google Maps tile indices using the [Slippy Map](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames) convention:
 
 ```python
 def deg2num(lat_deg, lon_deg, zoom):
@@ -346,7 +346,7 @@ def deg2num(lat_deg, lon_deg, zoom):
 
 #### Concurrent Tile Download
 
-Instead of sequential downloads (~30s), GeoSense uses a 10-thread pool:
+Instead of sequential downloads (~30s), PixelDeed uses a 10-thread pool:
 
 ```python
 with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
@@ -377,7 +377,7 @@ with rasterio.open(output_path, 'w', driver='GTiff',
 
 #### CPU Compatibility Patch
 
-HQ-SAM ships with CUDA-trained weights that crash on CPU-only machines. GeoSense patches this at the Python import level:
+HQ-SAM ships with CUDA-trained weights that crash on CPU-only machines. PixelDeed patches this at the Python import level:
 
 ```python
 # Monkey-patch torch.load BEFORE importing samgeo
@@ -398,7 +398,7 @@ from samgeo.hq_sam import SamGeo  # Now loads without CUDA error
 ## 📁 Project Structure
 
 ```
-GeoSense/
+PixelDeed/
 │
 ├── 📄 README.md                        # You are here
 ├── 📄 update_abi.js                    # Auto-sync contract ABIs → frontend
@@ -422,7 +422,7 @@ GeoSense/
 │   │   ├── page.jsx                    #    Landing page (hero + globe)
 │   │   ├── provider.jsx                #    Wagmi + RainbowKit + React Query
 │   │   ├── globals.css                 #    Tailwind v4 theme + glassmorphism
-│   │   ├── 📁 geosense/
+│   │   ├── 📁 pixeldeed/
 │   │   │   └── page.jsx                #    🗺️ Map Interface + AI Trigger
 │   │   ├── 📁 dashboard/
 │   │   │   └── page.jsx                #    📊 Portfolio + GeoJSON Export
@@ -496,8 +496,8 @@ GeoSense/
 ### 1️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/aditya-s45/GeoSense2.git
-cd GeoSense2/Geosense-interiiit-main
+git clone https://github.com/aditya-s45/PixelDeed2.git
+cd PixelDeed2/Geosense-interiiit-main
 ```
 
 ### 2️⃣ Setup the AI Backend
@@ -684,7 +684,7 @@ The backend uses a **multi-threaded tile stitching engine** that:
 
 ### HQ-SAM Segmentation
 
-GeoSense uses **Meta's High-Quality Segment Anything Model (HQ-SAM)** with the **ViT-H** backbone:
+PixelDeed uses **Meta's High-Quality Segment Anything Model (HQ-SAM)** with the **ViT-H** backbone:
 
 | Parameter | Value | Purpose |
 |:---|:---|:---|
@@ -748,5 +748,5 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 </p>
 
 <p align="center">
-  <sub>If GeoSense inspired you, consider giving it a ⭐ — it means more than you know.</sub>
+  <sub>If PixelDeed inspired you, consider giving it a ⭐ — it means more than you know.</sub>
 </p>
