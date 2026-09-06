@@ -740,7 +740,7 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 ---
 
 <p align="center">
-  <strong>Built with 🔥 by <a href="https://github.com/aditya-s45">Aditya Shingare</a></strong>
+  <strong>Built with 🔥 by <a href="https://github.com/aditya-s45">Aditya Shingare</a>AND <a href="https://github.com/Vedantvijayhumbe">Vedant Humbe </a></strong>
 </p>
 
 <p align="center">
